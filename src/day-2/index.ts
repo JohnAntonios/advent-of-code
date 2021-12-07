@@ -1,40 +1,61 @@
 import { resolve } from "path";
 import readTextFile from "../utils/readTextFile";
+import { CommandCentre, CommandFunction, Instruction, Position } from "./types";
+
+const moveForward: CommandFunction = (currentPosition, amount) => ({
+  ...currentPosition,
+  x: currentPosition.x + amount,
+});
+
+const moveUp: CommandFunction = (currentPosition, amount) => ({
+  ...currentPosition,
+  depth: currentPosition.depth - amount,
+});
+
+const moveDown: CommandFunction = (currentPosition, amount) => ({
+  ...currentPosition,
+  depth: currentPosition.depth + amount,
+});
+
+const COMMAND_CENTRE: CommandCentre = {
+  forward: moveForward,
+  up: moveUp,
+  down: moveDown,
+};
 
 (async () => {
   const filePath = resolve(__dirname, "file.txt");
 
   const instructions = await readTextFile(filePath);
 
-  let xPos = 0;
-  let depth = 0;
+  const initialPosition: Position = {
+    x: 0,
+    depth: 0,
+  };
 
-  instructions.forEach((instruction) => {
-    const [action, amount] = instruction.split(" ");
+  const position = instructions.reduce(
+    (currentPosition = initialPosition, currentInstruction: string) => {
+      let [action, amount]: Instruction = currentInstruction.split(" ");
 
-    if (!action || !amount) {
-      return;
-    }
+      if (!action || !amount) {
+        return currentPosition;
+      }
 
-    switch (action.trim().toLowerCase()) {
-      case "forward":
-        xPos += parseInt(amount);
-        break;
+      action = action.trim().toLowerCase();
+      amount = parseInt(amount.toString());
 
-      case "up":
-        depth -= parseInt(amount);
-        break;
+      const actionFunction = COMMAND_CENTRE[action];
 
-      case "down":
-        depth += parseInt(amount);
-        break;
+      if (!actionFunction) {
+        return currentPosition;
+      }
 
-      default:
-        break;
-    }
-  });
+      return actionFunction(currentPosition, amount);
+    },
+    initialPosition
+  );
 
-  const position = xPos * depth;
+  const calculatedPosition = position.x * position.depth;
 
-  console.log(position);
+  console.log(calculatedPosition);
 })();
