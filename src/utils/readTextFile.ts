@@ -5,7 +5,7 @@ export default async (filePath: string): Promise<string[]> => {
 
   const string = buffer.toString();
 
-  const stringArray = string.split("\r");
+  const stringArray = string.split("\r").map((s) => s.trim());
 
   return stringArray;
 };

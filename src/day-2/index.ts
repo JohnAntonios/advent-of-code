@@ -41,7 +41,7 @@ const COMMAND_CENTRE: CommandCentre = {
         return currentPosition;
       }
 
-      action = action.trim().toLowerCase();
+      action = action.toLowerCase();
       amount = parseInt(amount.toString());
 
       const actionFunction = COMMAND_CENTRE[action];
