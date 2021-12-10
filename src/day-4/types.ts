@@ -1,10 +1,7 @@
-export type DidMatch = boolean;
-
 export interface BingoBoard {
-  [num: number]: DidMatch;
+  [key: number]: boolean;
 }
 
-export interface BingoBoardContainer {
-  boardCount: number;
-  boards: BingoBoard[];
+export interface BingoBoards {
+  [key: string]: BingoBoard;
 }

@@ -1,6 +1,6 @@
 import { resolve } from "path";
 import readTextFile from "../utils/readTextFile";
-import { BingoBoard, BingoBoardContainer } from "./types";
+import { BingoBoards } from "./types";
 
 (async () => {
   const filePath = resolve(__dirname, "file_sample.txt");
@@ -9,43 +9,35 @@ import { BingoBoard, BingoBoardContainer } from "./types";
 
   const numbersToDraw = bingoGame[0]?.split(",").map((c) => parseInt(c)) || [];
 
-  const initialBingoBoardContainer: BingoBoardContainer = {
-    boardCount: 0,
-    boards: [],
-  };
+  const bingoBoards: BingoBoards = {};
 
-  const bingoBaordContainer = bingoGame
-    .slice(1)
-    .reduce(
-      (accBingoBoardContainer: BingoBoardContainer, bingoInput, idx, arr) => {
-        if (!bingoInput && arr[idx + 1]) {
-          const newBoardCount = accBingoBoardContainer.boardCount + 1;
-          return {
-            ...accBingoBoardContainer,
-            boardCount: newBoardCount,
-            boards: [...accBingoBoardContainer.boards, {}],
-          };
-        }
+  const keyPrefix = `Board_`;
 
-        const bingoNumber = parseInt(bingoInput);
+  bingoGame.slice(1).forEach((bingoInput, idx, arr) => {
+    const keyValue = Object.keys(bingoBoards).length + 1;
 
-        return {
-          ...accBingoBoardContainer,
-          boards: accBingoBoardContainer.boards.map(
-            (bingoBoard: BingoBoard, idx: number) => {
-              if (idx + 1 === accBingoBoardContainer.boardCount) {
-                return {
-                  ...accBingoBoardContainer.boards[idx],
-                  [bingoNumber]: false,
-                };
-              }
-              return bingoBoard;
-            }
-          ),
+    if (!bingoInput && arr[idx + 1]) {
+      bingoBoards[keyPrefix + keyValue] = {};
+    } else {
+      const bingoNumbers = bingoInput
+        .replace(/\s\s/g, " ")
+        .split(" ")
+        .map((n) => parseInt(n));
+
+      bingoNumbers.forEach((n) => {
+        bingoBoards[keyPrefix + (keyValue - 1)] = {
+          ...bingoBoards[keyPrefix + (keyValue - 1)],
+          [n]: false,
         };
-      },
-      initialBingoBoardContainer
-    );
+      });
+    }
+  });
 
-  console.log(bingoBaordContainer);
+  numbersToDraw.forEach((drawnNumber) => {
+    Object.entries(bingoBoards).forEach(([, board]) => {
+      board[drawnNumber] = drawnNumber in board;
+    });
+  });
+
+  console.log(bingoBoards);
 })();
